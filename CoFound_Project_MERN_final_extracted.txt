@@ -1,0 +1,367 @@
+
+
+CoFound
+College Team Matching Platform
+
+Find Your Teammates. Build Something Real.
+From Scattered WhatsApp Forwards to Structured Team Formation — One Platform.
+Document Type
+Project Proposal & Technical Brief
+Version
+v1.0 — June 2026
+Target Audience
+Professors, Interviewers & Evaluators
+Status
+Confidential
+Built By
+Soumya — B.Tech CSE IEP (SAP), Parul University
+
+
+TABLE OF CONTENTS
+#
+Section
+Page
+1.
+The Problem — Why Finding Teammates Is Broken
+3
+2.
+What Is CoFound?
+3
+3.
+How CoFound Works — The Big Picture
+4
+4.
+Core Feature: Authentication & User Profiles
+4
+5.
+Core Feature: Project & Team Listings
+5
+6.
+Core Feature: Join Request Flow
+6
+7.
+Core Feature: Dashboard
+7
+8.
+Core Feature: Real-Time Notifications
+7
+9.
+Tech Stack
+8
+10.
+Database Schema
+9
+11.
+What Makes CoFound Technically Strong
+11
+12.
+Why CoFound Stands Out
+12
+
+1. The Problem — Why Finding Teammates Is Broken
+Every college student has experienced this moment: a hackathon is announced, a project deadline is near, or a team event is coming up — and the frantic search for teammates begins. WhatsApp forwards fly across 10 groups, Instagram stories go up, and people walk around campus asking friends of friends. It is chaotic, unreliable, and unfair.
+
+This problem is not small. It affects every student, every semester, across every college in India.
+
+1.1 The Real Pain Points
+Pain Point
+What This Means for the Student
+No structured platform
+Students rely on WhatsApp groups and word-of-mouth — people with strong social networks get teams, others go solo.
+No skill visibility
+You cannot tell what a potential teammate actually knows until after you commit to working with them.
+Last-minute chaos
+Team formation happens hours before deadlines — poor teams, rushed work, avoidable failure.
+No record of past collaboration
+No way to know who you worked well with, who delivered, and who did not.
+Opportunity loss for introverts
+Students who are less socially connected miss out on great projects — not due to skill, but lack of network.
+Duplicate effort
+Multiple people form weak teams instead of combining into one strong team.
+
+Key Insight
+The best hackathon teams are not always the most talented — they are the ones that found each other in time. CoFound makes sure that is no longer a matter of luck or social connections.
+
+2. What Is CoFound?
+CoFound is a college-focused web platform where students post what they are building, specify the skills they need, and find verified teammates from within their college community — quickly, transparently, and structurally.
+
+It is not a social network. It is not a job board. It is specifically built for one purpose: helping students form the right teams for the right opportunities at the right time.
+
+2.1 CoFound Core Principles
+Principle
+What It Means
+College-First
+Built for the college context — hackathons, semester projects, startup ideas, fests, and events.
+Skill-Transparent
+Every profile shows verified skills — no guessing what someone actually knows.
+Structured Process
+A clean request → review → accept → team flow. No chaos, no ambiguity.
+Time-Aware
+Listings auto-expire when event deadlines pass. Always relevant, never cluttered.
+Real-Time
+Live notifications via WebSockets — know instantly when someone wants to join your team.
+Full Stack & Deployed
+A complete, live, production-grade product — not a prototype or wireframe.
+
+3. How CoFound Works — The Big Picture
+CoFound works as a connected system where user profiles, project listings, and the team request flow all share data. This means students never have to repeat information, and the platform always reflects the current, accurate state of every team.
+
+Example Flow
+A student posts a hackathon listing ("Need 2 teammates for SIH — need React + ML") → interested students find it via the feed → they send a join request → the poster reviews their profiles → accepts the best fit → team is formed, listing closes automatically.
+
+3.1 Who Uses CoFound
+User Type
+Goal
+What They Do in CoFound
+Team Seeker
+Looking for people to join
+Posts a listing, reviews requests, forms a team
+Talent
+Has skills, looking for a project
+Browses feed, sends join requests, joins teams
+Both
+Open to either role
+Can post listings AND send requests simultaneously
+
+4. Core Feature: Authentication & User Profiles
+Every interaction on CoFound begins with a verified user profile. Authentication is handled via JWT (JSON Web Tokens), ensuring stateless, secure, and scalable session management across the platform.
+
+4.1 Authentication Flow
+Student registers with name, email, password, college, branch, and year
+Password is hashed with bcrypt before storage — never stored in plain text
+On login, a signed JWT token is issued and stored on the client
+All protected routes verify the token via Express middleware before granting access
+Logout clears the token from the client — no server-side session to manage
+
+4.2 User Profile Features
+Feature
+Details
+Skill Tags
+Each user tags themselves with skills (React, Node.js, Python, Figma, DSA, ML, etc.) — visible to everyone
+Public Profile Page
+Every user has a shareable public profile page other students can view before sending a request
+College & Year
+Branch and year displayed on profile — helps teams form with appropriate academic context
+My Listings
+All project listings the user has posted — with request counts and current status
+My Teams
+All teams the user has been accepted into — with project details and teammates
+My Requests
+All join requests the user has sent — with current status (pending / accepted / rejected)
+
+5. Core Feature: Project & Team Listings
+Listings are the core unit of CoFound. A listing represents an opportunity — a hackathon, a project, a startup idea, or a college event — that needs a team. Every listing is structured, time-bound, and automatically managed by the system.
+
+5.1 How It Works — Step by Step
+Student creates a listing with title, description, category, skills needed, team size required, and deadline date
+Listing is immediately visible in the public feed — filterable by skill, category, and college year
+As students send join requests and get accepted, the team count updates in real time
+When the required team size is reached, the listing automatically moves to 'Team Full' status
+When the deadline passes, MongoDB TTL indexes automatically expire the listing — no manual cleanup required
+Poster can close or edit a listing at any time before the deadline
+
+5.2 Listing Features
+Feature
+Details
+Categories
+Hackathon / College Project / Startup Idea / College Event — filter by type
+Skills Needed Tags
+Poster tags required skills — system highlights listings that match the viewer's own skill set
+Team Size Tracking
+Listing shows X/N slots filled — clear visibility of how many spots remain
+Auto-Expiry (TTL)
+MongoDB TTL indexes delete listings automatically after the deadline date passes
+Status States
+Open → Requested → Team Full → Closed — a clean state machine with defined transitions
+Search & Filter
+Browse by skill needed, category, deadline, or college year of poster
+
+Technical Highlight
+MongoDB TTL (Time-To-Live) indexes automatically delete expired listing documents at the database level — no cron jobs, no manual queries. This is a database-native feature that shows understanding beyond basic CRUD operations.
+
+6. Core Feature: Join Request Flow
+The Join Request Flow is the most technically complex and product-critical part of CoFound. It is a multi-step, state-managed process that ensures fair, structured team formation — replacing informal, chaotic WhatsApp negotiations.
+
+6.1 The Request State Machine
+Every join request moves through a defined set of states. This is not basic CRUD — it is a state machine with business logic governing every transition.
+
+Request State
+What It Means
+Pending
+Request sent by interested student. Poster has been notified via Socket.io. Awaiting review.
+Accepted
+Poster reviewed the requester's profile and accepted. Student is now a team member.
+Rejected
+Poster declined the request. Requester notified. Listing remains open for others.
+Cancelled
+Requester withdrew their own request before a decision was made.
+Expired
+Listing deadline passed before request was resolved. Request auto-closed.
+
+6.2 Business Rules
+A student cannot send a join request to their own listing
+A student cannot send duplicate requests to the same listing
+A student already in a team for a listing cannot re-request
+Only the listing owner can accept or reject requests
+When team size is reached, all remaining pending requests are auto-rejected
+Request history is preserved — visible on both requester and poster dashboards
+
+6.3 Request Flow — Step by Step
+Student finds a listing and clicks 'Request to Join'
+System validates: not own listing, not duplicate request, listing still open
+Request created in database with status 'Pending'
+Listing poster receives a real-time Socket.io notification
+Poster opens their dashboard, reviews requester's public profile and skills
+Poster accepts or rejects — requester gets notified instantly via Socket.io
+On accept: requester added to team array, team count increments, listing status recalculates
+
+7. Core Feature: Dashboard
+The CoFound Dashboard is a student's personal control room — showing everything they need to manage their listings, requests, and teams from one screen.
+
+Dashboard Widget
+What It Shows
+My Listings
+All listings posted by the user — with current status, team size progress, and pending request count
+Incoming Requests
+All join requests received — with requester's name, skills, and profile link. Accept or reject in one click.
+My Requests Sent
+All listings the user has requested to join — with current status (pending / accepted / rejected)
+My Teams
+All teams the user is part of — with project name, teammates, and listing details
+Notification Centre
+All real-time alerts — new requests received, request status updates, team formations
+Quick Actions
+Create new listing, browse feed, view public profile — accessible from dashboard directly
+
+8. Core Feature: Real-Time Notifications
+CoFound uses Socket.io to deliver real-time notifications — making the platform feel live and responsive rather than static. This is one of the key technical differentiators of the project.
+
+8.1 What Triggers a Real-Time Notification
+Trigger Event
+Who Gets Notified & What
+New Join Request
+Poster receives instant notification when any student requests to join their listing
+Request Accepted
+Requester receives instant notification when their request is accepted by the poster
+Request Rejected
+Requester receives instant notification when their request is declined
+Team Full
+All pending requesters notified when the listing reaches its team size
+Listing Expiring Soon
+Poster notified 24 hours before their listing's deadline expires
+
+8.2 Technical Implementation
+Socket.io runs alongside the Express server on the same Node.js instance
+On login, the client establishes a persistent WebSocket connection
+Each user joins a private socket room identified by their user ID
+When an event occurs, the server emits to the specific user's room — not a broadcast
+Frontend React component subscribes to socket events and updates notification state
+Unread notification count shown on bell icon in navbar — updates in real time
+
+9. Tech Stack
+CoFound is built on the MERN stack — a modern, industry-standard, full stack JavaScript architecture. Every technology choice is justified by a specific product requirement.
+
+Technology
+Layer
+Why This Choice
+MongoDB + Mongoose
+Database
+Flexible document schema for user profiles and listings. TTL indexes for auto-expiry. No rigid relational structure needed.
+Express.js
+Backend Framework
+Lightweight, unopinionated REST API framework. Middleware-based architecture for JWT auth, validation, and error handling.
+React.js
+Frontend Framework
+Component-based UI. State management for real-time notification updates. Fast rendering for feed and dashboard.
+Node.js
+Runtime
+Unified JavaScript across frontend and backend. Non-blocking I/O — handles concurrent WebSocket connections efficiently.
+Socket.io
+Real-Time Layer
+Bidirectional event-based communication. Handles WebSocket connections with automatic fallback. Private room-based notifications.
+JWT (jsonwebtoken)
+Authentication
+Stateless token-based auth. Signed tokens with expiry. No server-side session storage needed.
+bcrypt
+Password Security
+Industry-standard password hashing. Salt rounds configurable. Never stores plain text passwords.
+Render
+Backend Deployment
+Free-tier Node.js hosting. Auto-deploy from GitHub. Production-grade with SSL.
+Vercel
+Frontend Deployment
+Free React hosting with global CDN. Instant deploy from GitHub. Custom domain support.
+
+10. Database Schema
+CoFound uses four MongoDB collections. The schema is designed to minimize redundancy while supporting all required queries efficiently.
+
+10.1 Collections Overview
+Collection
+Key Fields
+users
+name, email, passwordHash, college, branch, year, skills[ ], createdAt
+listings
+title, description, category, skillsNeeded[ ], teamSize, deadline, postedBy (ref: User), status, members[ ], createdAt
+requests
+listingId (ref: Listing), requestedBy (ref: User), status (pending/accepted/rejected/cancelled), createdAt, updatedAt
+notifications
+userId (ref: User), type, message, read (boolean), relatedListing, createdAt
+
+10.2 Key Schema Design Decisions
+listings.deadline is indexed with a TTL index — MongoDB auto-deletes documents after this date
+listings.status is an enum — enforces valid state transitions at the schema level
+requests uses refs to both User and Listing — enables efficient population of full objects when needed
+notifications.read allows the frontend to show unread count without fetching all notification content
+skills[ ] stored as string arrays — simple, fast to query, easy to filter and match against
+
+11. What Makes CoFound Technically Strong
+CoFound is not a tutorial clone or a basic CRUD application. It demonstrates multiple distinct backend and full stack concepts that are rarely seen in student portfolios.
+
+Technical Concept
+How CoFound Demonstrates It
+State Machine
+Listings move through defined states (Open → Full → Closed). Requests move through (Pending → Accepted/Rejected). Transitions are enforced by backend logic — not just frontend UI.
+MongoDB TTL Indexes
+Database-level document expiry. Listing documents are automatically deleted after their deadline — no cron jobs, no scheduled tasks, no manual cleanup code.
+JWT Authentication
+Stateless, signed token-based auth with expiry. Custom Express middleware validates tokens on every protected route. Industry-standard implementation.
+Socket.io Real-Time
+Private room-based WebSocket notifications. Server emits to specific user rooms — not broadcasts. Frontend subscribes and updates state reactively.
+Role-Based Logic
+Within each listing, the poster and requesters have different permissions. Backend enforces these rules — frontend cannot bypass them by manipulating API calls.
+Ref-Based Schema
+MongoDB documents reference each other via ObjectId — enables population of full user/listing objects in a single query. Demonstrates understanding of NoSQL data relationships.
+
+12. Why CoFound Stands Out
+
+12.1 Compared to Typical Student Projects
+Typical Student Project
+CoFound
+Typical Student Project
+CoFound
+Todo app, Netflix clone, e-commerce template
+Original product idea solving a real problem
+Basic CRUD only — create, read, update, delete
+State machine + TTL indexes + real-time layer
+No deployment — runs only on localhost
+Fully deployed — live on Render + Vercel
+'I followed a YouTube tutorial'
+'I built this because I struggled to find teammates myself'
+No real-time features
+Socket.io WebSocket notifications
+Single-role access
+Role-based logic within each listing context
+
+12.2 Interview Talking Points
+"Why did you build this?" — I struggled to find teammates for every hackathon. WhatsApp groups were chaotic. I built the proper solution.
+"What was the hardest part?" — The join request state machine. Managing concurrent requests, auto-rejection when team is full, and keeping listing status accurate.
+"What technical concept are you most proud of?" — MongoDB TTL indexes. Database-level auto-expiry without cron jobs or scheduled tasks.
+"What would you improve?" — Team chat via Socket.io, college email verification, and a recommendation algorithm that matches listings to users based on skill overlap.
+"Is it deployed?" — Yes. Backend on Render, frontend on Vercel. Live demo available.
+
+Final Summary
+CoFound is a full stack MERN application with JWT auth, MongoDB TTL indexes, Socket.io real-time notifications, and a multi-step state machine — built to solve a real problem every college student has personally experienced. It is live, deployable, and demo-able.
+
+
+Ready to Build Something Real?
+Built by Soumya  |  B.Tech CSE (SAP), Parul University, Vadodara  |  Batch 2026
